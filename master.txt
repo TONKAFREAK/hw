@@ -1,0 +1,7 @@
+1111,John Doe,123.45
+1213,Mike Smith,932.65
+1234,Wilson Lopez,540.87
+1243,Thomas Lee,123.54
+1255,Scott Hall,1200.00
+1259,Cook Rogers,329.76
+1268,James Wood,2211.98

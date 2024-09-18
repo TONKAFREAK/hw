@@ -1,0 +1,32 @@
+Name: John Doe	Account Number: 1111
+
+					Previous Balance: 123.45
+
+Transaction number: 0			Item Ordered: Tablet	Order Amount: 750.87
+Transaction number: 1			Item Ordered: Charger	Order Amount: 126.15
+Transaction number: 2			Payment Amount: 354.0	Payment w discount: 354.00
+Transaction number: 3			Payment Amount: 450.0	Payment w discount: 450.00
+Name: Mike Smith	Account Number: 1213
+
+					Previous Balance: 932.65
+
+Name: Wilson Lopez	Account Number: 1234
+
+					Previous Balance: 540.87
+
+Name: Thomas Lee	Account Number: 1243
+
+					Previous Balance: 123.54
+
+Name: Scott Hall	Account Number: 1255
+
+					Previous Balance: 1200.0
+
+Name: Cook Rogers	Account Number: 1259
+
+					Previous Balance: 329.76
+
+Name: James Wood	Account Number: 1268
+
+					Previous Balance: 2211.98
+
