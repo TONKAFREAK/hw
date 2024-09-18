@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static int globalTransNum = 0;
+    public static int globalTransNum = (int)(Math.random() * 327);
     public static int lastDiscountIndex = 0;
 
     /*
