@@ -8,17 +8,24 @@ public class Main {
     public static int globalTransNum = 0;
     public static int lastDiscountIndex = 0;
 
+    /*
+     * REads Cusnomer info from the given file
+     * returns array of customer Objects
+    */
     public static Customer[] readCustomers(File file) {
 
         try {
 
-        Scanner accReader = new Scanner(file);
+            boolean isDuplicate = false;
 
-        Customer[] customers = new Customer[7];
+            Scanner accReader = new Scanner(file);
 
-        int i = 0;
+            Customer[] customers = new Customer[7];
+
+            int i = 0;
         
             while (accReader.hasNext()) {
+                isDuplicate = false;
                 String line = accReader.nextLine();
                 String[] lineSplit = line.split(",");
 
@@ -26,20 +33,42 @@ public class Main {
 
                 if (lineSplit[0].length() != 4) {
                     System.out.println("Invalid Customer Number: " + lineSplit[0] + " must be 4 digits.");
+                    continue;
                 }
 
                 if (lineSplit[1].length() > 20) {
                     System.out.println("Invalid Customer Name: " + lineSplit[1] + " must be less than 20 characters.");
+                    continue;
                 }
 
                 if (lineSplit.length != 3) {
                     System.out.println("Missing required account information for customer, please check your master.txt file.");
+                    continue;
                     
                 }
 
-                Customer customer = new Customer(Integer.parseInt(lineSplit[0]), lineSplit[1], Double.parseDouble(lineSplit[2]));
+                if (customers != null) {
 
-                customers[i] = customer;
+                    for (int j = 0; j < customers.length; j++) {
+
+                        if (customers[j] != null && customers[j].customerNum == Integer.parseInt(lineSplit[0])) {
+                            System.out.println("Duplicate Customer Number: " + lineSplit[0]);
+                            isDuplicate = true;
+                        }
+                    }
+                }
+                
+                if (!isDuplicate) {
+
+                    Customer customer = new Customer(Integer.parseInt(lineSplit[0]), lineSplit[1], Double.parseDouble(lineSplit[2]));
+
+                    customers[i] = customer;
+
+                } else {
+
+                    continue;
+                }
+
                 i++;
                 
             }
@@ -55,6 +84,9 @@ public class Main {
 
     }
 
+    /*
+     * searches the array of customer object for the given customer NUmber than returns the index of the customer
+    */
     public static int getCustomerIndex(Customer[] customers, int customerNum) {
         if (customers == null) return -1;
         for (int i = 0; i < customers.length; i++) {
@@ -66,6 +98,11 @@ public class Main {
     }
     
 
+    /*
+     * Reads the discounds from the given file.
+     * Remembers the last discount index
+     * returns the next discount
+    */
     public static int getDiscount(File file){
 
         try {
@@ -74,13 +111,14 @@ public class Main {
 
         int discountIndex = 0;
         while (discReader.hasNext()) {
-            String discount = discReader.nextLine().trim();
+            int discount = discReader.nextInt();
+            //System.out.println(discount);
 
             if ( discountIndex == lastDiscountIndex) {
-                lastDiscountIndex = discountIndex+1;
+                lastDiscountIndex++;
+                //System.out.println("Discount: " + discount);
                 discReader.close();
-                System.out.println("Discount: " + discount);
-                return Integer.parseInt(discount);
+                return discount;
             }
 
             discountIndex++;
@@ -96,6 +134,10 @@ public class Main {
         return 0;
     }
 
+    /*
+     * Reads the transactions from the given transtactions file
+     * Adds the transcations to the customers object if the customer number matches.
+    */
     public static void readTransactions(File transFile, Customer[] customers, File discountsFile) {
 
         try {
@@ -114,12 +156,21 @@ public class Main {
             int customerNum = Integer.parseInt(lineSplit[1]);
 
             Transaction transaction;
-            int discount = 0;
             int customerIndex = getCustomerIndex(customers, customerNum);
+
+            if (customerIndex == -1) {
+                System.out.println("Invalid Customer Number: " + customerNum);
+                continue;
+            }
+
             if (type == 'P') {
                 double price = Double.parseDouble(lineSplit[2]);
                 transaction = new Transaction(type, transNum, null, 0, price);
-                transaction.setDiscount(getDiscount(discountsFile));
+                int discount = getDiscount(discountsFile);
+                //System.out.println(discount);
+                transaction.setDiscount(discount);
+                
+                
                 customers[customerIndex].addTransaction(transaction);
             } else {
                 String item = lineSplit[2];
@@ -138,6 +189,10 @@ public class Main {
         }
     }
 
+    /*
+     * Writes the Invoice to the given file.
+     * gets all the necessary information from the customer object
+    */    
     public static void printInvoices(Customer[] customers, File invoicesFile) {
 
         try {
@@ -146,26 +201,31 @@ public class Main {
             for (int i = 0; i < customers.length; i++) {
 
                 fw.write("Name: "+customers[i].name + "\t" + "Account Number: "+customers[i].customerNum + "\n\n"
-                + "\t\t\t\t\tPrevious Balance: " + customers[i].balance + "\n\n");
+                + "\t\t\t\t\tPrevious Balance: $" + customers[i].balance + "\n\n");
 
                 for (int j = 0; j < customers[i].transactions.size(); j++) {
 
                     if (customers[i].getTransaction(j).type == 'O') {
 
                         fw.write("Transaction number: "+ customers[i].getTransaction(j).transNum + "\t\t\t" + 
-                                    "Item Ordered: " + customers[i].getTransaction(j).item + "\t"+
-                                    "Order Amount: " + String.format("%.2f", customers[i].getTransaction(j).quantity * customers[i].getTransaction(j).price) + "\n");
+                                    "Item Ordered: " + customers[i].getTransaction(j).item + "\t\t"+
+                                    "Quantity: " + customers[i].getTransaction(j).quantity + "\t\t"+
+                                    
+                                    "Order Amount: $" + String.format("%.2f", customers[i].getTransaction(j).quantity * customers[i].getTransaction(j).price) + "\n");
+                        customers[i].balance += customers[i].getTransaction(j).quantity * customers[i].getTransaction(j).price;
                     } else {
 
-                        double givenDiscount = customers[i].getTransaction(j).getDiscount() / 100 * customers[i].getTransaction(j).price;
-                        System.out.println(customers[i].getTransaction(j).price);
-                        System.out.println();
-                        System.out.println(givenDiscount);
+                        double givenDiscount = customers[i].getTransaction(j).getDiscount() * customers[i].getTransaction(j).price / 100;
                         fw.write("Transaction number: "+ customers[i].getTransaction(j).transNum + "\t\t\t" +
-                                    "Payment Amount: "+ customers[i].getTransaction(j).price +"\t"+ "Payment w discount: "+ String.format("%.2f",givenDiscount + customers[i].getTransaction(j).price) + "\n");
+                                    "Payment Amount: $"+ String.format("%.2f", customers[i].getTransaction(j).price )+"\t\t"+ 
+                                    "Payment w discount: $"+ String.format("%.2f",givenDiscount + customers[i].getTransaction(j).price)+" (with discount of "+customers[i].getTransaction(j).getDiscount()+"%)" + "\n");
+
+                        customers[i].balance -= givenDiscount + customers[i].getTransaction(j).price;
                     }
 
                 }
+
+                fw.write("\n\t\t\t\t\tBalance Due: $" + String.format("%.2f", customers[i].balance) + "\n\n");
             }
 
             fw.close();
@@ -183,10 +243,8 @@ public class Main {
 
     Customer[] customers = readCustomers(masterFile);
     readTransactions(transactionsFile, customers, discountsFile);
-    System.out.println(customers[0].toString());
+    //System.out.println(customers[0].toString());
     printInvoices(customers, invoicesFile);
-    
-    
     
     }
 }

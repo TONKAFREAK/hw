@@ -23,23 +23,15 @@ public class Customer {
 
     public void addTransaction(Transaction transaction) {
         transactions.add(transaction); 
-        System.out.println("Transaction added: " + transaction);
+        //System.out.println("Transaction added: " + transaction);
     }
 
     public Transaction getTransaction(int index) {
         return transactions.get(index);
     }
 
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
     public String toString() {
-        return "Account information: " + customerNum + " " + name + " " + balance +" "+transactions.get(1).discount;
+        return "Account information: " + customerNum + " " + name + " " + balance +" "+transactions.get(2).discount;
     }
 
 }
